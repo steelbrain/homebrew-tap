@@ -7,12 +7,14 @@ Homebrew casks for apps published under
 
 | Cask | App | Requires |
 | --- | --- | --- |
+| `dhol` | [Dhol](https://github.com/steelbrain/dhol.app), a menu bar dictation app that transcribes speech on your Mac | Apple silicon, macOS 14 or later |
 | `lemurcam` | [LemurCam](https://lemur.cam/), a virtual webcam for RTSP and ONVIF IP cameras ([source](https://github.com/steelbrain/LemurCam)) | macOS 14 or later |
 | `rdpeek` | [RDPeek](https://rdpeek.com/), a native macOS remote desktop client ([source](https://github.com/steelbrain/RDPeek)) | macOS 14 or later |
 
 ## Install
 
 ```sh
+brew install --cask steelbrain/tap/dhol
 brew install --cask steelbrain/tap/lemurcam
 brew install --cask steelbrain/tap/rdpeek
 ```
@@ -32,6 +34,14 @@ brew install --cask --adopt steelbrain/tap/<cask>
 brew upgrade --cask steelbrain/tap/<cask>
 brew uninstall --cask steelbrain/tap/<cask>
 ```
+
+### Dhol
+
+`brew uninstall --zap --cask steelbrain/tap/dhol` also deletes Dhol's
+settings, including its dictation shortcut, and the 2.5 GB speech model
+it downloaded to `~/.cache/huggingface/hub` on first launch. Another app
+that uses the same model (`mlx-community/parakeet-tdt-0.6b-v3`) will
+download it again.
 
 ### LemurCam
 

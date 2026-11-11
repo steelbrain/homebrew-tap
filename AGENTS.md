@@ -15,6 +15,11 @@ name taps the repository and trusts the cask, which Homebrew 6.0 and later
 require for casks outside Homebrew's own taps.
 
 - `Casks/<cask>.rb` — one cask per app.
+- `Casks/dhol.rb` — [Dhol](https://github.com/steelbrain/dhol.app). Each
+  Dhol release `v<version>` on GitHub (three-part versions, such as
+  `v0.1.0`) carries a signed, notarized `Dhol.zip` with `Dhol.app` at its
+  top level. The repository has no website, so the cask's `homepage` is
+  the GitHub repository.
 - `Casks/lemurcam.rb` — [LemurCam](https://github.com/steelbrain/LemurCam).
   Each LemurCam release `v<version>` on GitHub (two-part versions, such as
   `v1.6`) carries a signed, notarized `LemurCam.zip` with `LemurCam.app`
@@ -33,14 +38,19 @@ it lands there.
    `curl -sLO https://github.com/steelbrain/RDPeek/releases/download/v<version>/RDPeek.zip`
    then `shasum -a 256 RDPeek.zip`. Do this in a fresh, empty directory.
    For LemurCam the asset is
-   `https://github.com/steelbrain/LemurCam/releases/download/v<version>/LemurCam.zip`.
+   `https://github.com/steelbrain/LemurCam/releases/download/v<version>/LemurCam.zip`,
+   and for Dhol it is
+   `https://github.com/steelbrain/dhol.app/releases/download/v<version>/Dhol.zip`.
 2. Set `version` and `sha256` in the cask. The `url` interpolates
    `version`; don't hardcode it.
-3. Keep `depends_on macos:` equal to the app's minimum macOS. For RDPeek
-   and LemurCam that is `deploymentTarget` in their `project.yml` (14.0,
-   `:sonoma`).
+3. Keep `depends_on macos:` equal to the app's minimum macOS. For RDPeek,
+   LemurCam and Dhol that is `deploymentTarget` in their `project.yml`
+   (14.0, `:sonoma`).
    Write the bare symbol (`depends_on macos: :sonoma`); `brew style`
    rejects the `">= :sonoma"` form.
+   Dhol also keeps `depends_on arch: :arm64`: its speech recognition runs
+   on MLX, which needs Apple silicon. Keep it even though the `v0.1.0`
+   binary also has an x86_64 slice.
 4. Validate (below), then commit.
 
 ## Cask Rules
@@ -55,6 +65,20 @@ it lands there.
   its app group `2KG9772KH6.cam.lemur.app` (`~/Library/Group Containers`
   and `~/Library/Application Scripts`). `zap` cannot remove Keychain
   items; don't try.
+- Dhol's bundle identifier is `ai.aneesiqbal.dhol`; it is not sandboxed.
+  It writes its preferences plist, and on first launch it downloads its
+  speech model (`Transcriber.modelID`,
+  `mlx-community/parakeet-tdt-0.6b-v3`) with a default `URLSession`, which
+  also writes `~/Library/Caches/ai.aneesiqbal.dhol` and
+  `~/Library/HTTPStorages/ai.aneesiqbal.dhol`. The model goes into the
+  Hugging Face cache, `~/.cache/huggingface/hub`, twice: swift-huggingface
+  keeps `models--<org>--<name>` plus a lock directory under `.locks`, and
+  mlx-audio-swift copies it to `mlx-audio/<org>_<name>`. Zap those three
+  directories, never the cache root or `mlx-audio` itself, which other
+  tools share. If Dhol changes its model, update the paths.
+  `brew generate-zap` also reports `com.apple.PressAndHold` ("dHold"
+  matches "dhol") and `com.steelbrain.dhol` paths left by pre-release
+  builds; leave both out.
 - LemurCam installs a camera system extension, and its Settings can
   install a privileged helper and a microphone driver in
   `/Library/Audio/Plug-Ins/HAL`. The app installs, updates and removes
@@ -62,8 +86,8 @@ it lands there.
   `uninstall` on every `brew upgrade` too, which would remove the
   microphone each time the app updates.
 - Don't add `auto_updates true` unless the app ships its own updater.
-  RDPeek and LemurCam have none, so `brew upgrade` is how users get new
-  versions.
+  RDPeek, LemurCam and Dhol have none, so `brew upgrade` is how users get
+  new versions.
 - Only ship signed, notarized builds. Never add quarantine removal or
   `--no-quarantine` advice.
 
@@ -101,7 +125,7 @@ brew untap steelbraindraft/tap
   owner's unneeded formulae, even when the cask isn't installed.
 - Delete the downloaded zip and Homebrew's cached copy
   (`~/Library/Caches/Homebrew/downloads/*--RDPeek.zip`,
-  `*--LemurCam.zip`) when done.
+  `*--LemurCam.zip`, `*--Dhol.zip`) when done.
 
 ## Git Conventions
 
