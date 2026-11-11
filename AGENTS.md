@@ -19,8 +19,8 @@ require for casks outside Homebrew's own taps.
   RDPeek release `v<version>` on GitHub carries a signed, notarized
   `RDPeek.zip` with `RDPeek.app` at its top level.
 
-Homebrew reads casks from the tap's default branch, `main`. Whatever is on
-`main` reaches every user on their next `brew update`, so validate before
+Homebrew reads casks from the tap's default branch, `master`. Whatever is on
+`master` reaches every user on their next `brew update`, so validate before
 it lands there.
 
 ## Updating a Cask for a New Release
@@ -56,7 +56,7 @@ Homebrew audits a cask only from a tapped tap, and it refuses to load
 casks from taps that aren't trusted. Validate committed work under a
 throwaway tap name, so a real `steelbrain/tap` on the machine is left
 alone. `brew tap` clones the committed `HEAD` of the local repository, so
-commit first (on a branch, not `main`):
+commit first (on a branch, not `master`):
 
 ```sh
 export HOMEBREW_NO_AUTO_UPDATE=1
