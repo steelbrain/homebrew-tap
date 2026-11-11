@@ -15,6 +15,10 @@ name taps the repository and trusts the cask, which Homebrew 6.0 and later
 require for casks outside Homebrew's own taps.
 
 - `Casks/<cask>.rb` — one cask per app.
+- `Casks/lemurcam.rb` — [LemurCam](https://github.com/steelbrain/LemurCam).
+  Each LemurCam release `v<version>` on GitHub (two-part versions, such as
+  `v1.6`) carries a signed, notarized `LemurCam.zip` with `LemurCam.app`
+  at its top level.
 - `Casks/rdpeek.rb` — [RDPeek](https://github.com/steelbrain/RDPeek). Each
   RDPeek release `v<version>` on GitHub carries a signed, notarized
   `RDPeek.zip` with `RDPeek.app` at its top level.
@@ -25,13 +29,16 @@ it lands there.
 
 ## Updating a Cask for a New Release
 
-1. Download the release asset and hash it:
+1. Download the release asset and hash it, for example:
    `curl -sLO https://github.com/steelbrain/RDPeek/releases/download/v<version>/RDPeek.zip`
    then `shasum -a 256 RDPeek.zip`. Do this in a fresh, empty directory.
+   For LemurCam the asset is
+   `https://github.com/steelbrain/LemurCam/releases/download/v<version>/LemurCam.zip`.
 2. Set `version` and `sha256` in the cask. The `url` interpolates
    `version`; don't hardcode it.
 3. Keep `depends_on macos:` equal to the app's minimum macOS. For RDPeek
-   that is `deploymentTarget` in its `project.yml` (14.0, `:sonoma`).
+   and LemurCam that is `deploymentTarget` in their `project.yml` (14.0,
+   `:sonoma`).
    Write the bare symbol (`depends_on macos: :sonoma`); `brew style`
    rejects the `">= :sonoma"` form.
 4. Validate (below), then commit.
@@ -43,10 +50,20 @@ it lands there.
   mention the platform (no "macOS", "Mac").
 - `zap` lists only paths the app writes. RDPeek's bundle identifier is
   `ai.aneesiqbal.rdpeek`, and it is not sandboxed, so its data is under
-  `~/Library`, not `~/Library/Containers`. `zap` cannot remove Keychain
+  `~/Library`, not `~/Library/Containers`. LemurCam's bundle identifier
+  is `cam.lemur.app`; it is not sandboxed either, and it also writes to
+  its app group `2KG9772KH6.cam.lemur.app` (`~/Library/Group Containers`
+  and `~/Library/Application Scripts`). `zap` cannot remove Keychain
   items; don't try.
+- LemurCam installs a camera system extension, and its Settings can
+  install a privileged helper and a microphone driver in
+  `/Library/Audio/Plug-Ins/HAL`. The app installs, updates and removes
+  these itself. Don't add `uninstall` directives for them: Homebrew runs
+  `uninstall` on every `brew upgrade` too, which would remove the
+  microphone each time the app updates.
 - Don't add `auto_updates true` unless the app ships its own updater.
-  RDPeek has none, so `brew upgrade` is how users get new versions.
+  RDPeek and LemurCam have none, so `brew upgrade` is how users get new
+  versions.
 - Only ship signed, notarized builds. Never add quarantine removal or
   `--no-quarantine` advice.
 
@@ -62,9 +79,9 @@ commit first (on a branch, not `master`):
 export HOMEBREW_NO_AUTO_UPDATE=1
 brew tap steelbraindraft/tap "$PWD"
 brew trust --tap steelbraindraft/tap
-brew style --cask steelbraindraft/tap/rdpeek
-brew audit --cask --online --strict steelbraindraft/tap/rdpeek
-brew livecheck --cask steelbraindraft/tap/rdpeek
+brew style --cask steelbraindraft/tap/<cask>
+brew audit --cask --online --strict steelbraindraft/tap/<cask>
+brew livecheck --cask steelbraindraft/tap/<cask>
 brew untrust --tap steelbraindraft/tap
 brew untap steelbraindraft/tap
 ```
@@ -82,8 +99,9 @@ brew untap steelbraindraft/tap
   or one that fails), `export HOMEBREW_NO_AUTOREMOVE=1
   HOMEBREW_NO_INSTALL_CLEANUP=1`. Otherwise `brew uninstall` removes the
   owner's unneeded formulae, even when the cask isn't installed.
-- Delete the downloaded `RDPeek.zip` and Homebrew's cached copy
-  (`~/Library/Caches/Homebrew/downloads/*--RDPeek.zip`) when done.
+- Delete the downloaded zip and Homebrew's cached copy
+  (`~/Library/Caches/Homebrew/downloads/*--RDPeek.zip`,
+  `*--LemurCam.zip`) when done.
 
 ## Git Conventions
 
