@@ -1,6 +1,6 @@
 cask "rdpeek" do
-  version "1.3.2"
-  sha256 "cd011dce86df031f8c60fda4537438a4b74514927bc029cd32cb6c7c377df4cd"
+  version "1.4.0"
+  sha256 "87511b9ed3440fb7451a2dc1db090c3c0fb774d4df66eb3728a0ab6d8d0fe754"
 
   url "https://github.com/steelbrain/RDPeek/releases/download/v#{version}/RDPeek.zip"
   name "RDPeek"
