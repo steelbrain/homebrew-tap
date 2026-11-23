@@ -106,14 +106,19 @@ brew trust --tap steelbraindraft/tap
 brew style --cask steelbraindraft/tap/<cask>
 brew audit --cask --online --strict steelbraindraft/tap/<cask>
 brew livecheck --cask steelbraindraft/tap/<cask>
-brew untrust --tap steelbraindraft/tap
 brew untap steelbraindraft/tap
+brew untrust --tap "$PWD"
 ```
 
 - `brew style` must report no offenses, and `brew audit` must report no
   problems. `--online` downloads and extracts the release asset, which
   checks the URL, the `sha256` and the archive contents.
 - `brew livecheck` must print the new version on both sides of `==>`.
+- Untap before untrusting: `brew untap` refuses to load the casks of an
+  untrusted tap, and fails. Homebrew stores the trust under the tap's
+  remote, which here is the repository's path, so untrust `"$PWD"`. Once
+  the tap is gone, `brew untrust --tap steelbraindraft/tap` no longer
+  finds the entry, and it stays in Homebrew's trust file.
 - Don't pass `--new` to `brew audit`. It applies the notability rules of
   Homebrew's official cask repository, which don't apply to this tap.
 - Don't install a cask on a machine that already has the app installed
