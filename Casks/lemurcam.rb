@@ -1,6 +1,6 @@
 cask "lemurcam" do
-  version "1.6"
-  sha256 "0bc1a6fd0a6a06155a22fba20349529d3c265fa3ddde40ef144b72dd71153f76"
+  version "1.7"
+  sha256 "60dc61f8395adb4c946d3ff16478dae8ec298ff93c98285efe440162b5ed8010"
 
   url "https://github.com/steelbrain/LemurCam/releases/download/v#{version}/LemurCam.zip"
   name "LemurCam"
